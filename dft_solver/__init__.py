@@ -17,10 +17,16 @@ except ImportError:
 from .scf import SCFSolver, SCFParams, SCFResult
 from .hamiltonian_wrapper import HamiltonianWrapper
 from .kpoints import KPoints
+from .mixing import (
+    DensityMixer, LinearMixer, BroydenMixer, DIISMixer,
+    kerker_preconditioner, create_mixer,
+)
 
 __version__ = "0.1.0"
 __all__ = [
     "SCFSolver", "SCFParams", "SCFResult",
     "HamiltonianWrapper", "KPoints",
+    "DensityMixer", "LinearMixer", "BroydenMixer", "DIISMixer",
+    "kerker_preconditioner", "create_mixer",
     "core", "_USING_CPP_EXT",
 ]
