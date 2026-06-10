@@ -91,6 +91,41 @@ class SCFResult:
     residual_norms: List[float] = field(default_factory=list)
     density: Optional[core.Density] = None
     mixing_history: Dict[str, List[Any]] = field(default_factory=dict)
+    n_electrons: float = 0.0
+    kpoint_grid: Optional[Tuple[int, int, int]] = None
+
+    def compute_dos(self, n_energy: int = 2000,
+                    method: str = "bloechl",
+                    plot: bool = True,
+                    plot_filename: Optional[str] = None,
+                    **kwargs) -> "DOSResult":
+        """Compute DOS from the SCF result using the tetrahedron method."""
+        from .dos import DOSCalculator, plot_dos
+
+        if not self.eigenvalues:
+            raise RuntimeError("No eigenvalues in SCFResult; run SCF first.")
+
+        grid = self.kpoint_grid
+        if grid is None:
+            nk = len(self.eigenvalues)
+            n_side = max(1, round(nk ** (1.0 / 3.0)))
+            grid = (n_side, n_side, n_side)
+            logger.warning(
+                f"K-point grid unknown; guessing ({n_side},{n_side},{n_side}). "
+                f"Pass grid= to SCFSolver or set result.kpoint_grid for accuracy."
+            )
+
+        calc = DOSCalculator(grid=grid, n_energy=n_energy, method=method)
+        result = calc.compute(
+            self.eigenvalues, self.n_electrons,
+            occupations=self.occupations if self.occupations else None,
+        )
+
+        if plot:
+            plot_dos(result, filename=plot_filename,
+                     show=(plot_filename is None), **kwargs)
+
+        return result
 
 
 # ============================================================================
@@ -554,6 +589,8 @@ class SCFSolver:
         result.eigenvectors = eigenvectors
         result.occupations = occupations
         result.density = density
+        result.n_electrons = self._n_electrons
+        result.kpoint_grid = self._kpoints.grid
         self._density = density
 
         if not converged and p.verbose:

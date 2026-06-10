@@ -1,7 +1,7 @@
 """K-point generation utilities."""
 
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 Vector3 = np.ndarray
@@ -10,7 +10,8 @@ Vector3 = np.ndarray
 class KPoints:
     """Manages k-point sampling of the Brillouin zone."""
 
-    def __init__(self, kpoints: np.ndarray, weights: np.ndarray):
+    def __init__(self, kpoints: np.ndarray, weights: np.ndarray,
+                 grid: Tuple[int, int, int] = None):
         if kpoints.ndim != 2 or kpoints.shape[1] != 3:
             raise ValueError("kpoints must have shape (N, 3)")
         if weights.shape[0] != kpoints.shape[0]:
@@ -19,6 +20,7 @@ class KPoints:
             weights = weights / weights.sum()
         self._kpoints = np.asarray(kpoints, dtype=float)
         self._weights = np.asarray(weights, dtype=float)
+        self._grid = grid
 
     @property
     def nk(self) -> int:
@@ -37,6 +39,10 @@ class KPoints:
 
     def weight(self, ik: int) -> float:
         return self._weights[ik]
+
+    @property
+    def grid(self) -> Optional[Tuple[int, int, int]]:
+        return self._grid
 
     @classmethod
     def gamma(cls) -> "KPoints":
@@ -57,7 +63,7 @@ class KPoints:
 
         kpoints = np.array(kpts)
         weights = np.ones(len(kpoints)) / len(kpoints)
-        return cls(kpoints, weights)
+        return cls(kpoints, weights, grid=tuple(grid))
 
     def to_cartesian(self, reciprocal_cell: np.ndarray) -> np.ndarray:
         return self._kpoints @ reciprocal_cell.T

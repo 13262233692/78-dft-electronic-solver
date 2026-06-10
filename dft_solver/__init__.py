@@ -21,6 +21,7 @@ from .mixing import (
     DensityMixer, LinearMixer, BroydenMixer, DIISMixer,
     kerker_preconditioner, create_mixer,
 )
+from .dos import DOSCalculator, DOSResult, compute_dos, plot_dos
 
 __version__ = "0.1.0"
 __all__ = [
@@ -28,5 +29,6 @@ __all__ = [
     "HamiltonianWrapper", "KPoints",
     "DensityMixer", "LinearMixer", "BroydenMixer", "DIISMixer",
     "kerker_preconditioner", "create_mixer",
+    "DOSCalculator", "DOSResult", "compute_dos", "plot_dos",
     "core", "_USING_CPP_EXT",
 ]
